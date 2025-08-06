@@ -1,4 +1,4 @@
-import Footer from "@/features/home/components/footer";
+import {Footer}from "@/features/home/components/footer";
 import {Header} from "@/features/home/components/header";
 import React from "react";
 
