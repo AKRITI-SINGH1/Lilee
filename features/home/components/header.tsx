@@ -66,7 +66,7 @@ export function Header() {
                       className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors flex items-center gap-2"
                     >
                       API
-                      <span className="text-green-500 dark:text-green-400 border border-green-500 dark:border-green-400 rounded-lg px-1 py-0.5 text-xs">
+                      <span className="text-pink-600 dark:text-pink-400 border border-pink-500 dark:border-pink-400 rounded-lg px-1 py-0.5 text-xs">
                         New
                       </span>
                     </Link>
