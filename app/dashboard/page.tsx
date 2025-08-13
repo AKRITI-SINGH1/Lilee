@@ -1,9 +1,9 @@
 import AddNewButton from "@/features/dashboard/components/add-new-button";
-import AddRepo from "@/features/dashboard/components/add-repo";
+import AddRepo from "@/features/dashboard/components/add-repo-button";
 import React from "react";
 
 import ProjectTable from "@/features/dashboard/components/project-table";
-import { getAllPlaygroundForUser , deleteProjectById ,editProjectById , duplicateProjectById} from "@/features/playground/actions";
+import { getAllPlaygroundForUser, deleteProjectById, editProjectById, duplicateProjectById } from "@/features/dashboard/action";
 
 const EmptyState = () => (
   <div className="flex flex-col items-center justify-center py-16">

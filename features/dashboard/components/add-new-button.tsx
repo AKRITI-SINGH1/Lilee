@@ -1,15 +1,30 @@
 "use client";
-
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import Image from 'next/image';
+import React from 'react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react'; 
-import React from 'react'
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import Image from 'next/image';
+import { Plus } from 'lucide-react';
+import TemplateSelectionModal from './template-selection-modal';
 
 const AddNewButton = () => {
-  return (
-     <div
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [selectedTemplate, setSelectedTemplate] = useState<{
+    title: string;
+    template: "REACT" | "NEXTJS" | "EXPRESS" | "VUE" | "HONO" | "ANGULAR";
+    description: string;
+  } | null>(null);
+
+
+  const router = useRouter();
+
+
+ return (
+    <>
+      <div
+        onClick={() => setIsModalOpen(true)}
         className="group px-6 py-6 flex flex-row justify-between items-center border rounded-lg bg-muted cursor-pointer 
         transition-all duration-300 ease-in-out
         hover:bg-background hover:border-[#F529A3] hover:scale-[1.02]
@@ -40,7 +55,17 @@ const AddNewButton = () => {
           />
         </div>
       </div>
+      
+      <TemplateSelectionModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSubmit={() => {}}
+      />
+    </>
   )
+
+
+  
 }
 
-export default AddNewButton
+export default AddNewButton;
