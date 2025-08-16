@@ -299,9 +299,9 @@ export default function ProjectTable({
 
       {/* Edit Project Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] ">
           <DialogHeader>
-            <DialogTitle>Edit Project</DialogTitle>
+            <DialogTitle className="text-[#F529A3]">Edit Project</DialogTitle>
             <DialogDescription>
               Make changes to your project details here. Click save when you're
               done.
@@ -359,7 +359,7 @@ export default function ProjectTable({
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Project</AlertDialogTitle>
+            <AlertDialogTitle className="text-[#F529A3]">Delete Project</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete "{selectedProject?.title}"? This
               action cannot be undone. All files and data associated with this
@@ -371,7 +371,7 @@ export default function ProjectTable({
             <AlertDialogAction
               onClick={handleDeleteProject}
               disabled={isLoading}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 "
             >
               {isLoading ? "Deleting..." : "Delete Project"}
             </AlertDialogAction>
