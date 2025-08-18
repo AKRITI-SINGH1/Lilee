@@ -1,7 +1,7 @@
 "use server"
 import { currentUser } from "@/features/auth/actions";
 import { db } from "@/lib/db"
-import { TemplateFolder } from "./libs/path-to-json";
+import { TemplateFolder } from "@/features/playground/types"; // Ensure this path is correct
 import { revalidatePath } from "next/cache";
 
 
@@ -67,31 +67,30 @@ export const createPlayground = async (data:{
 }
 
 
-export const getAllPlaygroundForUser = async ()=>{
-    const user = await currentUser();
-    try {
-        const user  = await currentUser();
-        const playground = await db.playground.findMany({
-            where:{
-                userId:user?.id!
-            },
-            include:{
-                user:true,
-                Starmark:{
-                    where:{
-                        userId:user?.id!
-                    },
-                    select:{
-                        isMarked:true
-                    }
-                }
-            }
-        })
-      
-        return playground;
-    } catch (error) {
-        console.log(error)
-    }
+export const getAllPlaygroundForUser = async () => {
+  const user = await currentUser();
+  try {
+    const playground = await db.playground.findMany({
+      where: {
+        userId: user?.id!,
+      },
+      include: {
+        user: true,
+        Starmark: {
+          where: {
+            userId: user?.id!,
+          },
+          select: {
+            isMarked: true,
+          },
+        },
+      },
+    });
+
+    return playground;
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 export const getPlaygroundById = async (id:string)=>{
@@ -117,20 +116,20 @@ export const SaveUpdatedCode = async (playgroundId: string, data: TemplateFolder
   if (!user) return null;
 
   try {
-    const updatedPlayground = await db.templateFile.upsert({
-      where: {
-        playgroundId, // now allowed since playgroundId is unique
-      },
-      update: {
-        content: JSON.stringify(data),
-      },
-      create: {
-        playgroundId,
-        content: JSON.stringify(data),
-      },
-    });
+    // playgroundId is not a unique field on TemplateFile in the current Prisma client
+    // Emulate upsert using findFirst + update/create
+    const existing = await db.templateFile.findFirst({ where: { playgroundId } });
 
-    return updatedPlayground;
+    if (existing) {
+      return await db.templateFile.update({
+        where: { id: existing.id },
+        data: { content: JSON.stringify(data) },
+      });
+    }
+
+    return await db.templateFile.create({
+      data: { playgroundId, content: JSON.stringify(data) },
+    });
   } catch (error) {
     console.log("SaveUpdatedCode error:", error);
     return null;

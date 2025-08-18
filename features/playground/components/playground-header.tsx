@@ -2,8 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Separator } from "@/components/ui/separator"
-import { Save, Loader2, Sparkles, Settings, Plus, Lightbulb } from "lucide-react"
+import { Save, Settings } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,25 +10,42 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { usePlayground } from "../context/playground-context"
 
-export function PlaygroundHeader() {
-  const {
-    playgroundData,
-    activeFileId,
-    openFiles,
-    handleSave,
-    handleSaveAll,
-    isAISuggestionsEnabled,
-    setIsAISuggestionsEnabled,
-    setIsPreviewVisible,
-    setIsTerminalVisible,
-    isPreviewVisible,
-    isTerminalVisible,
-  } = usePlayground()
+// Define props to decouple from missing context
+interface PlaygroundHeaderProps {
+  playgroundData?: { name?: string } | null
+  activeFileId: string | null
+  openFiles: Array<{
+    id: string
+    filename: string
+    fileExtension?: string
+    hasUnsavedChanges?: boolean
+  }>
+  handleSave: () => void
+  handleSaveAll: () => void
+  isAISuggestionsEnabled: boolean
+  setIsAISuggestionsEnabled: (value: boolean) => void
+  isPreviewVisible: boolean
+  setIsPreviewVisible: (value: boolean) => void
+  isTerminalVisible: boolean
+  setIsTerminalVisible: (value: boolean) => void
+}
 
-  const selectedFile = activeFileId ? openFiles.find((f) => f.id === activeFileId) : null
-  const hasUnsavedChanges = openFiles.some((f) => f.hasUnsavedChanges)
+export function PlaygroundHeader({
+  playgroundData,
+  activeFileId,
+  openFiles,
+  handleSave,
+  handleSaveAll,
+  isAISuggestionsEnabled,
+  setIsAISuggestionsEnabled,
+  setIsPreviewVisible,
+  setIsTerminalVisible,
+  isPreviewVisible,
+  isTerminalVisible,
+}: PlaygroundHeaderProps) {
+  const selectedFile = activeFileId ? openFiles.find((f) => f.id === activeFileId) ?? null : null
+  const hasUnsavedChanges = openFiles.some((f) => !!f.hasUnsavedChanges)
 
   return (
     <header className="h-14 border-b flex items-center px-4 justify-between">

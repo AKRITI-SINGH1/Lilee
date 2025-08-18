@@ -37,15 +37,14 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import WebContainerPreview from "@/features/webcontainers/components/webcontainer-preveiw";
+import WebContainerPreview from "@/features/webcontainers/components/webcontainer-preview";
 import LoadingStep from "@/components/ui/loader";
-import { PlaygroundEditor } from "@/features/playground/components/playground-editor";
+import { PlaygroundEditor } from "../../../features/playground/components/playground-editor";
 import ToggleAI from "@/features/playground/components/toggle-ai";
 import { useFileExplorer } from "@/features/playground/hooks/useFileExplorer";
 import { usePlayground } from "@/features/playground/hooks/usePlayground";
 import { useAISuggestions } from "@/features/playground/hooks/useAISuggestion";
 import { useWebContainer } from "@/features/webcontainers/hooks/useWebContainer";
-import { SaveUpdatedCode } from "@/features/playground/actions";
 import { TemplateFolder } from "@/features/playground/types";
 import { findFilePath } from "@/features/playground/libs";
 import { ConfirmationDialog } from "@/features/playground/components/dialogs/conformation-dialog";
@@ -73,7 +72,6 @@ const MainPlaygroundPage: React.FC = () => {
     closeAllFiles,
     openFile,
     closeFile,
-    editorContent,
     updateFileContent,
     handleAddFile,
     handleAddFolder,
@@ -107,8 +105,6 @@ const MainPlaygroundPage: React.FC = () => {
   // Initialize zustand templateData from usePlayground only on first load
   React.useEffect(() => {
     if (templateData && !openFiles.length) {
-
-      
       setTemplateData(templateData);
     }
   }, [templateData, setTemplateData, openFiles.length]);
@@ -189,7 +185,7 @@ const MainPlaygroundPage: React.FC = () => {
   };
 
   const handleSave = useCallback(
-    async (fileId?: string) => {
+    async (fileId?: string): Promise<void> => {
       const targetFileId = fileId || activeFileId;
       if (!targetFileId) return;
 
@@ -209,22 +205,25 @@ const MainPlaygroundPage: React.FC = () => {
         }
 
         // Update file content in template data (clone for immutability)
-        const updatedTemplateData = JSON.parse(
+        const updatedTemplateData: TemplateFolder = JSON.parse(
           JSON.stringify(latestTemplateData)
         );
-        const updateFileContent = (items: any[]) =>
+        // Rename helper to avoid shadowing hook's updateFileContent and annotate return type
+        const updateItemsContent = (
+          items: (TemplateFile | TemplateFolder)[]
+        ): (TemplateFile | TemplateFolder)[] =>
           items.map((item) => {
             if ("folderName" in item) {
-              return { ...item, items: updateFileContent(item.items) };
+              return { ...item, items: updateItemsContent(item.items) } as TemplateFolder;
             } else if (
               item.filename === fileToSave.filename &&
               item.fileExtension === fileToSave.fileExtension
             ) {
-              return { ...item, content: fileToSave.content };
+              return { ...item, content: fileToSave.content } as TemplateFile;
             }
             return item;
           });
-        updatedTemplateData.items = updateFileContent(
+        updatedTemplateData.items = updateItemsContent(
           updatedTemplateData.items
         );
 
@@ -238,8 +237,8 @@ const MainPlaygroundPage: React.FC = () => {
         }
 
         // Use saveTemplateData to persist changes
-        const newTemplateData = await saveTemplateData(updatedTemplateData);
-        setTemplateData(newTemplateData || updatedTemplateData);
+        await saveTemplateData(updatedTemplateData);
+        setTemplateData(updatedTemplateData);
 
         // Update open files
         const updatedOpenFiles = openFiles.map((f) =>
@@ -276,7 +275,7 @@ const MainPlaygroundPage: React.FC = () => {
     ]
   );
 
-  const handleSaveAll = async () => {
+  const handleSaveAll = async (): Promise<void> => {
     const unsavedFiles = openFiles.filter((f) => f.hasUnsavedChanges);
 
     if (unsavedFiles.length === 0) {
@@ -513,19 +512,19 @@ const MainPlaygroundPage: React.FC = () => {
                       <PlaygroundEditor
                         activeFile={activeFile}
                         content={activeFile?.content || ""}
-                        onContentChange={(value) =>
-                          activeFileId && updateFileContent(activeFileId, value)
-                        }
+                        onContentChange={(value: string) => {
+                          if (activeFileId) updateFileContent(activeFileId, value)
+                        }}
                         suggestion={aiSuggestions.suggestion}
                         suggestionLoading={aiSuggestions.isLoading}
                         suggestionPosition={aiSuggestions.position}
-                        onAcceptSuggestion={(editor, monaco) =>
+                        onAcceptSuggestion={(editor: any, monaco: any) =>
                           aiSuggestions.acceptSuggestion(editor, monaco)
                         }
-                        onRejectSuggestion={(editor) =>
+                        onRejectSuggestion={(editor: any) =>
                           aiSuggestions.rejectSuggestion(editor)
                         }
-                        onTriggerSuggestion={(type, editor) =>
+                        onTriggerSuggestion={(type: string, editor: any) =>
                           aiSuggestions.fetchSuggestion(type, editor)
                         }
                       />

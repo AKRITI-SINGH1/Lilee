@@ -1,21 +1,30 @@
-import { auth } from "@/auth";
+import NextAuth from "next-auth";
 
+import {
+  DEFAULT_LOGIN_REDIRECT,
+  apiAuthPrefix,
+  publicRoutes,
+  authRoutes,
+} from "@/routes";
 import authConfig from "./auth.config";
-import { apiAuthPrefix, authRoutes, DEFAULT_LOGIN_REDIRECT, publicRoutes } from "./routes";
 
+
+const { auth } = NextAuth(authConfig);
+
+// @ts-ignore
 export default auth((req) => {
   const { nextUrl } = req;
+  const isLoggedIn = !!req.auth;
 
-  // Allow NextAuth API routes without touching req.auth
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
+
+  const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
+
+  const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+
   if (isApiAuthRoute) {
     return null;
   }
-
-  const isLoggedIn = !!req.auth;
-
-  const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
-  const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
   if (isAuthRoute) {
     if (isLoggedIn) {
@@ -24,13 +33,14 @@ export default auth((req) => {
     return null;
   }
 
-  if (!isLoggedIn && !isPublicRoute) {
-    return Response.redirect(new URL("/auth/sign-in", nextUrl));
+  if(!isLoggedIn && !isPublicRoute){
+    return Response.redirect(new URL("/auth/sign-in" , nextUrl))
   }
 
-  return null;
+  return null
 });
 
 export const config = {
+  // copied from clerk
   matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };
