@@ -178,6 +178,9 @@ const MainPlaygroundPage: React.FC = () => {
     [handleRenameFolder, saveTemplateData]
   );
 
+  console.log("templateData", templateData);
+  console.log("PlaygroundData", playgroundData);
+
   const activeFile = openFiles.find((file) => file.id === activeFileId);
   const hasUnsavedChanges = openFiles.some((file) => file.hasUnsavedChanges);
 
