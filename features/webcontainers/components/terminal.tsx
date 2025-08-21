@@ -46,6 +46,8 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
   const disposedRef = useRef(false);
   const initFitRafRef = useRef<number | null>(null);
   const resizeFitRafRef = useRef<number | null>(null);
+  const delayedFitTimeoutRef = useRef<number | null>(null);
+  const sizeObserverRef = useRef<ResizeObserver | null>(null);
   
   // Command line state
   const currentLine = useRef<string>("");
@@ -102,7 +104,72 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
       brightCyan: "#06B6D4",
       brightWhite: "#FAFAFA",
     },
-  };
+  } as const;
+
+  const elementHasSize = useCallback(() => {
+    const el = terminalRef.current;
+    if (!el || !el.isConnected) return false;
+    const rect = el.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  }, []);
+
+  const waitForContainerSize = useCallback(async () => {
+    if (elementHasSize()) return;
+    await new Promise<void>((resolve) => {
+      let rafId: number | null = null;
+      const check = () => {
+        if (elementHasSize()) {
+          if (rafId) cancelAnimationFrame(rafId);
+          if (sizeObserverRef.current) {
+            sizeObserverRef.current.disconnect();
+            sizeObserverRef.current = null;
+          }
+          resolve();
+          return;
+        }
+        rafId = requestAnimationFrame(check);
+      };
+
+      // Also observe size changes
+      if (terminalRef.current) {
+        sizeObserverRef.current = new ResizeObserver(() => {
+          if (elementHasSize()) {
+            if (rafId) cancelAnimationFrame(rafId);
+            if (sizeObserverRef.current) {
+              sizeObserverRef.current.disconnect();
+              sizeObserverRef.current = null;
+            }
+            resolve();
+          }
+        });
+        sizeObserverRef.current.observe(terminalRef.current);
+      }
+
+      check();
+    });
+  }, [elementHasSize]);
+
+  const safeFit = useCallback(() => {
+    if (disposedRef.current) return;
+    if (!fitAddon.current || !term.current) return;
+    if (!elementHasSize()) {
+      // Retry shortly if container has no size yet
+      if (delayedFitTimeoutRef.current) {
+        clearTimeout(delayedFitTimeoutRef.current);
+      }
+      delayedFitTimeoutRef.current = window.setTimeout(() => {
+        if (!disposedRef.current) {
+          safeFit();
+        }
+      }, 120) as unknown as number;
+      return;
+    }
+    try {
+      fitAddon.current.fit();
+    } catch {
+      // swallow; future resizes will retry
+    }
+  }, [elementHasSize]);
 
   const writePrompt = useCallback(() => {
     if (term.current) {
@@ -314,6 +381,9 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
     terminal.loadAddon(webLinksAddon);
     terminal.loadAddon(searchAddonInstance);
 
+    // Wait for container to have real size before opening
+    await waitForContainerSize();
+
     terminal.open(terminalRef.current);
     
     fitAddon.current = fitAddonInstance;
@@ -323,29 +393,23 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
     // Handle terminal input
     terminal.onData(handleTerminalInput);
 
-    // Initial fit: wait for fonts/layout to be ready to avoid undefined dimensions
-    const doSafeFit = () => {
-      if (!disposedRef.current && fitAddon.current && term.current) {
-        try {
-          fitAddon.current.fit();
-        } catch (e) {
-          // Ignore fit errors if renderer not ready yet
-          // Another resize or user interaction will refit later
-        }
-      }
+    // Initial fit when layout/fonts ready and container has size
+    const doInitialFit = () => {
+      if (disposedRef.current) return;
+      safeFit();
     };
 
     if (typeof document !== "undefined" && (document as any).fonts?.ready) {
       (document as any).fonts.ready.then(() => {
-        if (!disposedRef.current) doSafeFit();
+        doInitialFit();
       });
     } else if (typeof window !== "undefined") {
       initFitRafRef.current = window.requestAnimationFrame(() => {
-        doSafeFit();
+        doInitialFit();
       });
     }
 
-    // Welcome message
+    // Welcome message after first fit attempt to reduce refresh churn
     terminal.writeln("🚀 WebContainer Terminal");
     terminal.writeln("Type 'help' for available commands");
     writePrompt();
@@ -354,7 +418,7 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
     onReady?.(api);
 
     return terminal;
-  }, [theme, handleTerminalInput, writePrompt, onReady]);
+  }, [theme, handleTerminalInput, writePrompt, onReady, safeFit, waitForContainerSize]);
 
   const connectToWebContainer = useCallback(async () => {
     if (!webContainerInstance || !term.current) return;
@@ -430,13 +494,7 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
         cancelAnimationFrame(resizeFitRafRef.current);
       }
       resizeFitRafRef.current = requestAnimationFrame(() => {
-        if (!disposedRef.current && fitAddon.current && term.current) {
-          try {
-            fitAddon.current.fit();
-          } catch (e) {
-            // ignore
-          }
-        }
+        safeFit();
       });
     });
 
@@ -455,6 +513,14 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
         cancelAnimationFrame(resizeFitRafRef.current);
         resizeFitRafRef.current = null;
       }
+      if (delayedFitTimeoutRef.current) {
+        clearTimeout(delayedFitTimeoutRef.current);
+        delayedFitTimeoutRef.current = null;
+      }
+      if (sizeObserverRef.current) {
+        sizeObserverRef.current.disconnect();
+        sizeObserverRef.current = null;
+      }
       if (currentProcess.current) {
         currentProcess.current.kill();
       }
@@ -468,7 +534,7 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
       fitAddon.current = null;
       searchAddon.current = null;
     };
-  }, [initializeTerminal]);
+  }, [initializeTerminal, safeFit]);
 
   useEffect(() => {
     if (webContainerInstance && term.current && !isConnected) {

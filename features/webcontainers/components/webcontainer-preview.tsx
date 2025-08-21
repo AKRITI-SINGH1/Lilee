@@ -6,7 +6,7 @@ import { transformToWebContainerFormat } from "../hooks/transformer";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import dynamic from "next/dynamic";
-import { WebContainer } from "@webcontainer/api";
+import type { WebContainer } from "@webcontainer/api";
 
 // Dynamically import the terminal to fully disable SSR of xterm
 const TerminalComponent = dynamic(() => import("./terminal"), {

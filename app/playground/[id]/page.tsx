@@ -92,6 +92,7 @@ const MainPlaygroundPage: React.FC = () => {
     error: containerError,
     instance,
     writeFileSync,
+    start,
     // @ts-ignore
   } = useWebContainer({ templateData });
 
@@ -534,15 +535,23 @@ const MainPlaygroundPage: React.FC = () => {
                       <>
                         <ResizableHandle />
                         <ResizablePanel defaultSize={50}>
-                          <WebContainerPreview
-                            templateData={templateData}
-                            instance={instance}
-                            writeFileSync={writeFileSync}
-                            isLoading={containerLoading}
-                            error={containerError}
-                            serverUrl={serverUrl!}
-                            forceResetup={false}
-                          />
+                          {!instance ? (
+                            <div className="h-full flex items-center justify-center">
+                              <Button onClick={() => start()} disabled={containerLoading}>
+                                {containerLoading ? "Starting..." : "Start Preview"}
+                              </Button>
+                            </div>
+                          ) : (
+                            <WebContainerPreview
+                              templateData={templateData}
+                              instance={instance}
+                              writeFileSync={writeFileSync}
+                              isLoading={containerLoading}
+                              error={containerError}
+                              serverUrl={serverUrl!}
+                              forceResetup={false}
+                            />
+                          )}
                         </ResizablePanel>
                       </>
                     )}
