@@ -24,6 +24,8 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
+  chatMessages ChatMessage[]
+
   myPlayground StarMark[]
 
   // One-to-many: a user owns many playgrounds
@@ -101,7 +103,7 @@ model ChatMessage {
   content   String
   createdAt DateTime @default(now())
 
-  //user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
