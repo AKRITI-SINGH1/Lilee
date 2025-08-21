@@ -1,10 +1,10 @@
 // templatePaths.ts
 export const templatePaths = {
-    REACT: '/vibecode-starters/react-ts',
-    NEXTJS: '/vibecode-starters/nextjs-new',
-    EXPRESS: '/vibecode-starters/express-simple',
-    VUE: '/vibecode-starters/vue',
-    HONO: '/vibecode-starters/hono-nodejs-starter',
-    ANGULAR: '/vibecode-starters/angular',
+    // Map enum keys to real directories in the repo
+    REACT: 'lileecode-starters/react-ts',
+    NEXTJS: 'lileecode-starters/nextjs',
+    EXPRESS: 'lileecode-starters/express-simple',
+    VUE: 'lileecode-starters/vue',
+    HONO: 'lileecode-starters/hono-nodejs-starter',
+    ANGULAR: 'lileecode-starters/angular',
   };
-  

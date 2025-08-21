@@ -17,11 +17,10 @@ function validateJsonStructure(data: unknown): boolean {
 }
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _request: NextRequest,
+  ctx: { params: { id: string } }
 ) {
-  const param = await params;
-  const id = param.id;
+  const id = ctx.params?.id;
 
   if (!id) {
     return Response.json({ error: "Missing playground ID" }, { status: 400 });
@@ -58,9 +57,7 @@ export async function GET(
       return Response.json({ error: "Invalid JSON structure" }, { status: 500 });
     }
 
-
-
-    await fs.unlink(outputFile);
+    await fs.unlink(outputFile).catch(() => {});
 
     return Response.json({ success: true, templateJson: result }, { status: 200 });
   } catch (error) {

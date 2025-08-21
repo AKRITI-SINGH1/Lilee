@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from "react";
-import { Terminal } from "xterm";
-import { FitAddon } from "xterm-addon-fit";
-import { WebLinksAddon } from "xterm-addon-web-links";
-import { SearchAddon } from "xterm-addon-search";
+// Use type-only imports to avoid executing xterm modules during SSR
+import type { Terminal as XTermType } from "xterm";
+import type { FitAddon as FitAddonType } from "xterm-addon-fit";
+import type { WebLinksAddon as WebLinksAddonType } from "xterm-addon-web-links";
+import type { SearchAddon as SearchAddonType } from "xterm-addon-search";
 import "xterm/css/xterm.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ interface TerminalProps {
   className?: string;
   theme?: "dark" | "light";
   webContainerInstance?: any;
+  onReady?: (api: TerminalRef) => void;
 }
 
 // Define the methods that will be exposed through the ref
@@ -29,15 +31,21 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
   webcontainerUrl, 
   className,
   theme = "dark",
-  webContainerInstance
+  webContainerInstance,
+  onReady
 }, ref) => {
   const terminalRef = useRef<HTMLDivElement>(null);
-  const term = useRef<Terminal | null>(null);
-  const fitAddon = useRef<FitAddon | null>(null);
-  const searchAddon = useRef<SearchAddon | null>(null);
+  const term = useRef<XTermType | null>(null);
+  const fitAddon = useRef<FitAddonType | null>(null);
+  const searchAddon = useRef<SearchAddonType | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  
+  // Track lifecycle to avoid calling xterm APIs after dispose
+  const disposedRef = useRef(false);
+  const initFitRafRef = useRef<number | null>(null);
+  const resizeFitRafRef = useRef<number | null>(null);
   
   // Command line state
   const currentLine = useRef<string>("");
@@ -104,8 +112,7 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
     }
   }, []);
 
-  // Expose methods through ref
-  useImperativeHandle(ref, () => ({
+  const api: TerminalRef = {
     writeToTerminal: (data: string) => {
       if (term.current) {
         term.current.write(data);
@@ -119,7 +126,10 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
         term.current.focus();
       }
     },
-  }));
+  };
+
+  // Expose methods through ref
+  useImperativeHandle(ref, () => api);
 
   const executeCommand = useCallback(async (command: string) => {
     if (!webContainerInstance || !term.current) return;
@@ -271,16 +281,24 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
     }
   }, [executeCommand, writePrompt]);
 
-  const initializeTerminal = useCallback(() => {
+  const initializeTerminal = useCallback(async () => {
     if (!terminalRef.current || term.current) return;
+
+    // Dynamically import xterm and addons on client
+    const [{ Terminal }, { FitAddon }, { WebLinksAddon }, { SearchAddon }] = await Promise.all([
+      import("xterm"),
+      import("xterm-addon-fit"),
+      import("xterm-addon-web-links"),
+      import("xterm-addon-search"),
+    ]);
 
     const terminal = new Terminal({
       cursorBlink: true,
-      fontFamily: '"Fira Code", "JetBrains Mono", "Consolas", monospace',
+      fontFamily: '\"Fira Code\", \"JetBrains Mono\", \"Consolas\", monospace',
       fontSize: 14,
       lineHeight: 1.2,
       letterSpacing: 0,
-      theme: terminalThemes[theme],
+      theme: (terminalThemes as any)[theme],
       allowTransparency: false,
       convertEol: true,
       scrollback: 1000,
@@ -305,18 +323,38 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
     // Handle terminal input
     terminal.onData(handleTerminalInput);
 
-    // Initial fit
-    setTimeout(() => {
-      fitAddonInstance.fit();
-    }, 100);
+    // Initial fit: wait for fonts/layout to be ready to avoid undefined dimensions
+    const doSafeFit = () => {
+      if (!disposedRef.current && fitAddon.current && term.current) {
+        try {
+          fitAddon.current.fit();
+        } catch (e) {
+          // Ignore fit errors if renderer not ready yet
+          // Another resize or user interaction will refit later
+        }
+      }
+    };
+
+    if (typeof document !== "undefined" && (document as any).fonts?.ready) {
+      (document as any).fonts.ready.then(() => {
+        if (!disposedRef.current) doSafeFit();
+      });
+    } else if (typeof window !== "undefined") {
+      initFitRafRef.current = window.requestAnimationFrame(() => {
+        doSafeFit();
+      });
+    }
 
     // Welcome message
     terminal.writeln("🚀 WebContainer Terminal");
     terminal.writeln("Type 'help' for available commands");
     writePrompt();
 
+    // Notify parent that API is ready
+    onReady?.(api);
+
     return terminal;
-  }, [theme, handleTerminalInput, writePrompt]);
+  }, [theme, handleTerminalInput, writePrompt, onReady]);
 
   const connectToWebContainer = useCallback(async () => {
     if (!webContainerInstance || !term.current) return;
@@ -376,22 +414,30 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
     }
   }, []);
 
-  const searchInTerminal = useCallback((term: string) => {
-    if (searchAddon.current && term) {
-      searchAddon.current.findNext(term);
+  const searchInTerminal = useCallback((termStr: string) => {
+    if (searchAddon.current && termStr) {
+      searchAddon.current.findNext(termStr);
     }
   }, []);
 
   useEffect(() => {
-    initializeTerminal();
+    // Initialize terminal on mount (client-side only)
+    void initializeTerminal();
 
-    // Handle resize
+    // Handle resize with RAF-debounced fit; avoid fitting after disposal
     const resizeObserver = new ResizeObserver(() => {
-      if (fitAddon.current) {
-        setTimeout(() => {
-          fitAddon.current?.fit();
-        }, 100);
+      if (resizeFitRafRef.current) {
+        cancelAnimationFrame(resizeFitRafRef.current);
       }
+      resizeFitRafRef.current = requestAnimationFrame(() => {
+        if (!disposedRef.current && fitAddon.current && term.current) {
+          try {
+            fitAddon.current.fit();
+          } catch (e) {
+            // ignore
+          }
+        }
+      });
     });
 
     if (terminalRef.current) {
@@ -399,7 +445,16 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
     }
 
     return () => {
+      disposedRef.current = true;
       resizeObserver.disconnect();
+      if (initFitRafRef.current) {
+        cancelAnimationFrame(initFitRafRef.current);
+        initFitRafRef.current = null;
+      }
+      if (resizeFitRafRef.current) {
+        cancelAnimationFrame(resizeFitRafRef.current);
+        resizeFitRafRef.current = null;
+      }
       if (currentProcess.current) {
         currentProcess.current.kill();
       }
@@ -410,12 +465,14 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
         term.current.dispose();
         term.current = null;
       }
+      fitAddon.current = null;
+      searchAddon.current = null;
     };
   }, [initializeTerminal]);
 
   useEffect(() => {
     if (webContainerInstance && term.current && !isConnected) {
-      connectToWebContainer();
+      void connectToWebContainer();
     }
   }, [webContainerInstance, connectToWebContainer, isConnected]);
 
@@ -497,7 +554,7 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
           ref={terminalRef} 
           className="absolute inset-0 p-2"
           style={{ 
-            background: terminalThemes[theme].background,
+            background: (terminalThemes as any)[theme].background,
           }}
         />
       </div>

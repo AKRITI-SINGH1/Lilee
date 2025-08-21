@@ -53,7 +53,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { EnhancedCodeBlock } from "./ai-chat-code-blocks";
 import { EnhancedFilePreview } from "./file-preview";
-import "katex/dist/katex.min.css";
 
 interface FileAttachment {
   id: string;
@@ -1146,25 +1145,27 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                           remarkPlugins={[remarkGfm, remarkMath]}
                           rehypePlugins={[rehypeKatex]}
                           components={{
-                            code: ({
-                              children,
-                              className,
-                              inline: _inline,
-                            }) => (
-                              <EnhancedCodeBlock
-                                className={className}
-                                inline={_inline as boolean}
-                                onInsert={
-                                  onInsertCode
-                                    ? (code) => handleInsertCode(code)
-                                    : undefined
-                                }
-                                onRun={onRunCode}
-                                theme={theme}
-                              >
-                                {String(children)}
-                              </EnhancedCodeBlock>
-                            ),
+                            code: (props) => {
+                              const { children, className } = props as any;
+                              const isInline = (props as any)?.inline as
+                                | boolean
+                                | undefined;
+                              return (
+                                <EnhancedCodeBlock
+                                  className={className}
+                                  inline={!!isInline}
+                                  onInsert={
+                                    onInsertCode
+                                      ? (code) => handleInsertCode(code)
+                                      : undefined
+                                  }
+                                  onRun={onRunCode}
+                                  theme={theme}
+                                >
+                                  {String(children)}
+                                </EnhancedCodeBlock>
+                              );
+                            },
                           }}
                         >
                           {msg.content}

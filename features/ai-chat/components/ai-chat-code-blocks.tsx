@@ -21,7 +21,8 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
-import { vscDarkPlus, vs } from "react-syntax-highlighter/dist/esm/styles/prism"
+import vscDarkPlus from "react-syntax-highlighter/dist/esm/styles/prism/vsc-dark-plus"
+import vs from "react-syntax-highlighter/dist/esm/styles/prism/vs"
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   DropdownMenu,
