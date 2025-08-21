@@ -15,6 +15,8 @@ const eslintConfig = [
     ignores: [
       "lib/generated/**/*",
       "prisma/generated/**/*",
+      "lileecode-starters/**/*",
+      "output/**/*",
       "**/node_modules/**",
       ".next/**",
       "out/**",
