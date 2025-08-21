@@ -18,9 +18,9 @@ function validateJsonStructure(data: unknown): boolean {
 
 export async function GET(
   _request: NextRequest,
-  ctx: { params: { id: string } }
+  ctx: { params: Promise<{ id: string }> }
 ) {
-  const id = ctx.params?.id;
+  const { id } = await ctx.params;
 
   if (!id) {
     return Response.json({ error: "Missing playground ID" }, { status: 400 });
