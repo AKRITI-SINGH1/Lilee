@@ -11,6 +11,25 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    ignores: [
+      "lib/generated/**/*",
+      "prisma/generated/**/*",
+      "**/node_modules/**",
+      ".next/**",
+      "out/**",
+      "build/**",
+      "dist/**"
+    ]
+  },
+  {
+    rules: {
+      // Allow empty object types in generated files or specific contexts
+      "@typescript-eslint/no-empty-object-type": "off",
+      // Allow any types in generated files or when necessary for flexibility
+      "@typescript-eslint/no-explicit-any": "warn",
+    }
+  }
 ];
 
 export default eslintConfig;

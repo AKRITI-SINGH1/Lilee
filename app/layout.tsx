@@ -4,7 +4,6 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { AuthProvider } from "@/components/providers/auth-provider";
-import { auth } from "@/auth";
 import { Toaster } from "@/components/ui/sonner";
 
 const poppins = Poppins({
@@ -17,13 +16,11 @@ export const metadata: Metadata = {
   description: "LileeCode - Editor - Code Editor For LileeCoders is a free online code editor that lets you write, debug, and run your code in the browser.",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
-  
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${poppins.className} antialiased`}>

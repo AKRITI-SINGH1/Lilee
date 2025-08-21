@@ -93,7 +93,7 @@ const MainPlaygroundPage: React.FC = () => {
     instance,
     writeFileSync,
     start,
-    // @ts-ignore
+    // @ts-expect-error - WebContainer hook types need updating
   } = useWebContainer({ templateData });
 
   const lastSyncedContent = useRef<Map<string, string>>(new Map());
@@ -257,12 +257,12 @@ const MainPlaygroundPage: React.FC = () => {
         toast.success(
           `Saved ${fileToSave.filename}.${fileToSave.fileExtension}`
         );
-      } catch (error) {
-        console.error("Error saving file:", error);
+      } catch (saveError) {
+        console.error("Error saving file:", saveError);
         toast.error(
           `Failed to save ${fileToSave.filename}.${fileToSave.fileExtension}`
         );
-        throw error;
+        throw saveError;
       }
     },
     [
@@ -519,13 +519,13 @@ const MainPlaygroundPage: React.FC = () => {
                         suggestion={aiSuggestions.suggestion}
                         suggestionLoading={aiSuggestions.isLoading}
                         suggestionPosition={aiSuggestions.position}
-                        onAcceptSuggestion={(editor: any, monaco: any) =>
+                        onAcceptSuggestion={(editor: unknown, monaco: unknown) =>
                           aiSuggestions.acceptSuggestion(editor, monaco)
                         }
-                        onRejectSuggestion={(editor: any) =>
+                        onRejectSuggestion={(editor: unknown) =>
                           aiSuggestions.rejectSuggestion(editor)
                         }
-                        onTriggerSuggestion={(type: string, editor: any) =>
+                        onTriggerSuggestion={(type: string, editor: unknown) =>
                           aiSuggestions.fetchSuggestion(type, editor)
                         }
                       />
