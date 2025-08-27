@@ -7,4 +7,4 @@ export const templatePaths = {
     VUE: 'lileecode-starters/vue',
     HONO: 'lileecode-starters/hono-nodejs-starter',
     ANGULAR: 'lileecode-starters/angular',
-  };
+  } as const;

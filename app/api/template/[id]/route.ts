@@ -16,53 +16,157 @@ function validateJsonStructure(data: unknown): boolean {
   }
 }
 
+// Helper function to check if directory exists
+async function directoryExists(dirPath: string): Promise<boolean> {
+  try {
+    const stat = await fs.stat(dirPath);
+    return stat.isDirectory();
+  } catch {
+    return false;
+  }
+}
+
 export async function GET(
   _request: NextRequest,
   ctx: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await ctx.params;
-
-  if (!id) {
-    return Response.json({ error: "Missing playground ID" }, { status: 400 });
-  }
-
-  const playground = await db.playground.findUnique({
-    where: { id },
-  });
-
-  if (!playground) {
-    return Response.json({ error: "Playground not found" }, { status: 404 });
-  }
-
-  const templateKey = playground.template as keyof typeof templatePaths;
-  const templatePath = templatePaths[templateKey];
-
-  if (!templatePath) {
-    return Response.json({ error: "Invalid template" }, { status: 404 });
-  }
-
   try {
+    const { id } = await ctx.params;
+
+    if (!id) {
+      console.error("Missing playground ID");
+      return Response.json({ error: "Missing playground ID" }, { status: 400 });
+    }
+
+    console.log("Loading playground with ID:", id);
+
+    const playground = await db.playground.findUnique({
+      where: { id },
+    });
+
+    if (!playground) {
+      console.error("Playground not found for ID:", id);
+      return Response.json({ error: "Playground not found" }, { status: 404 });
+    }
+
+    console.log("Playground found:", playground);
+
+    const templateKey = playground.template as keyof typeof templatePaths;
+    const templatePath = templatePaths[templateKey];
+
+    if (!templatePath) {
+      console.error("Invalid template key:", templateKey);
+      return Response.json({ error: "Invalid template" }, { status: 404 });
+    }
+
     const inputPath = path.join(process.cwd(), templatePath);
     const outputFile = path.join(process.cwd(), `output/${templateKey}.json`);
 
+    console.log("Template key:", templateKey);
     console.log("Input Path:", inputPath);
     console.log("Output Path:", outputFile);
+
+    // Check if the template directory exists
+    const dirExists = await directoryExists(inputPath);
+    if (!dirExists) {
+      console.error("Template directory does not exist:", inputPath);
+      return Response.json({ 
+        error: "Template directory not found",
+        details: `Directory ${inputPath} does not exist`
+      }, { status: 404 });
+    }
+
+    // Ensure output directory exists
+    const outputDir = path.dirname(outputFile);
+    await fs.mkdir(outputDir, { recursive: true });
 
     // Save and read the template structure
     await saveTemplateStructureToJson(inputPath, outputFile);
     const result = await readTemplateStructureFromJson(outputFile);
 
-    // Validate the JSON structure before saving
-    if (!validateJsonStructure(result.items)) {
+    console.log("Template structure loaded successfully");
+
+    // Validate the JSON structure before returning
+    if (!validateJsonStructure(result)) {
+      console.error("Invalid JSON structure in result");
       return Response.json({ error: "Invalid JSON structure" }, { status: 500 });
     }
 
-    await fs.unlink(outputFile).catch(() => {});
+    // Clean up the temporary file
+    try {
+      await fs.unlink(outputFile);
+    } catch (unlinkError) {
+      console.warn("Could not delete temporary file:", unlinkError);
+    }
 
     return Response.json({ success: true, templateJson: result }, { status: 200 });
+
   } catch (error) {
-    console.error("Error generating template JSON:", error);
-    return Response.json({ error: "Failed to generate template" }, { status: 500 });
+    console.error("Error in template API route:", error);
+    return Response.json({ 
+      error: "Failed to generate template",
+      details: error instanceof Error ? error.message : "Unknown error"
+    }, { status: 500 });
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  ctx: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await ctx.params;
+    const body = await request.json();
+
+    if (!id) {
+      return Response.json({ error: "Missing playground ID" }, { status: 400 });
+    }
+
+    if (!body.templateData) {
+      return Response.json({ error: "Missing template data" }, { status: 400 });
+    }
+
+    // Validate the template data structure
+    if (!validateJsonStructure(body.templateData)) {
+      return Response.json({ error: "Invalid template data structure" }, { status: 400 });
+    }
+
+    // Update the playground's template files in the database
+    const playground = await db.playground.findUnique({
+      where: { id },
+    });
+
+    if (!playground) {
+      return Response.json({ error: "Playground not found" }, { status: 404 });
+    }
+
+    // Update or create template file record
+    const existingFile = await db.templateFile.findFirst({
+      where: { playgroundId: id }
+    });
+
+    if (existingFile) {
+      await db.templateFile.update({
+        where: { id: existingFile.id },
+        data: { content: JSON.stringify(body.templateData) }
+      });
+    } else {
+      await db.templateFile.create({
+        data: {
+          playgroundId: id,
+          content: JSON.stringify(body.templateData)
+        }
+      });
+    }
+
+    return Response.json({ success: true, message: "Template updated successfully" }, { status: 200 });
+
+  } catch (error) {
+    console.error("Error updating template:", error);
+    return Response.json({
+      error: "Failed to update template",
+      details: error instanceof Error ? error.message : "Unknown error"
+    }, { status: 500 });
   }
 }
 

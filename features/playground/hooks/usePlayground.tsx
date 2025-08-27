@@ -46,9 +46,16 @@ export const usePlayground = (id: string): UsePlaygroundReturn => {
 
       // Load template from API if not in saved content
       const res = await fetch(`/api/template/${id}`);
-      if (!res.ok) throw new Error(`Failed to load template: ${res.status}`);
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error("API Error Response:", errorData);
+        throw new Error(`Failed to load template: ${res.status} - ${errorData.error || 'Unknown error'}`);
+      }
 
       const templateRes = await res.json();
+      console.log("Template API Response:", templateRes);
+      
       if (templateRes.templateJson && Array.isArray(templateRes.templateJson)) {
         setTemplateData({
           folderName: "Root",
