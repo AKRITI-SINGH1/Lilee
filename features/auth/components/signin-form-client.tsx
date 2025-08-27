@@ -24,14 +24,14 @@ async function handleGithubSignIn(){
 
 const SignInFormClient = () => {
   return (
-    <Card className='w-full max-w-md'>
+    <Card className='w-full max-w-md bg-pink-200 rounded-lg '>
          <CardHeader className='space-y-1'>
-            <CardTitle className='text-2xl font-bold text-center'>Sign In</CardTitle>
-            <CardDescription className='text-center'>
+            <CardTitle className='text-2xl font-bold text-center text-pink-700'>Sign In</CardTitle>
+            <CardDescription className='text-center text-black'>
                 Choose Your Preferred Sign-in Method
             </CardDescription>
          </CardHeader>
-         <CardContent className='grid gap-4'>
+         <CardContent className='grid gap-4 '>
             <form action={handleGoogleSignIn}>
                 <Button type='submit' variant={"outline"} className='w-full'>
                     <Chrome className='mr-2 h-4 w-4' />
@@ -45,15 +45,15 @@ const SignInFormClient = () => {
                 </Button>
             </form>
          </CardContent>
-         <CardFooter className='text-sm text-center text-gray-500 dark:text-gray-400 w-full'>
+         <CardFooter className='text-sm text-center text-black w-full'>
             <p>
                 By signing in, you agree to our {""}
-                    <a href= "#" className='underline hover:text-primary'>
-                    Terms of Service
+                    <a href= "#" className='underline hover:text-primary '>
+                    Terms of Service 
                     </a>{""}
-                    and{""}
+                     and {""}
                     <a href='#' className='underline hover:text-primary'>
-                        Privacy Policy
+                         Privacy Policy
                     </a>
             </p>
          </CardFooter>
