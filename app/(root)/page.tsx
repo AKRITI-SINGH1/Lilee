@@ -23,7 +23,7 @@ export default function Home() {
        Lilee Code Editor is an intelligent platform that empowers developers to write, debug, and optimize code with unparalleled speed and precision through a powerful suite of advanced features and seamless integration. 
       </p>
       <Link href={"/dashboard"}>
-        <Button variant={"brand"} className="mb-4" size={"lg"}>
+        <Button variant={"brand"} className="mb-4 bg-pink-500 rounded-full" size={"lg"}>
           Get Started
           <ArrowUpRight className="w-3.5 h-3.5" />
         </Button>
