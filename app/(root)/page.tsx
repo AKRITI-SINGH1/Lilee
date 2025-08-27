@@ -13,9 +13,17 @@ export default function Home() {
       <div className="flex flex-col justify-center items-center my-5">
       <Image src={"/hero.svg"} alt="Hero-Section" height={500}  width={500} style={{height: 'auto'}} className="mb-2" priority/>
       
-      <h1 className=" z-20 text-6xl mt-5 font-extrabold text-center bg-clip-text text-transparent bg-gradient-to-r from-pink-100 via-pink-400 to-pink-300 dark:from-pink-500 dark:via-pink-400 dark:to-pink-200 tracking-tight leading-[1.3] ">
-        Lilee Code with Intelligence
-      </h1>
+      <h1 
+  className="z-20 text-6xl mt-5 font-extrabold text-center bg-clip-text text-transparent tracking-tight leading-[1.3]"
+  style={{
+    background: 'linear-gradient(0deg, rgba(237, 178, 223, 1) 0%, rgba(237, 14, 100, 1) 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text'
+  }}
+>
+  Lilee Code with Intelligence
+</h1>
       </div>
      
 
