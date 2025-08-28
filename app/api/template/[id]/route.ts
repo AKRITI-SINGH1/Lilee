@@ -277,6 +277,469 @@ export default App;`
 .App-header h1 {
   margin: 0 0 20px 0;
 }`
+            },
+            {
+              filename: "index",
+              fileExtension: "css",
+              content: `body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}`
+            }
+          ]
+        }
+      ]
+    },
+    EXPRESS: {
+      folderName: "express-project",
+      items: [
+        {
+          filename: "package",
+          fileExtension: "json",
+          content: JSON.stringify({
+            "name": "express-project",
+            "version": "1.0.0",
+            "description": "Express.js starter project",
+            "main": "index.js",
+            "scripts": {
+              "start": "node index.js",
+              "dev": "nodemon index.js"
+            },
+            "dependencies": {
+              "express": "^4.18.2",
+              "cors": "^2.8.5"
+            },
+            "devDependencies": {
+              "nodemon": "^2.0.20"
+            }
+          }, null, 2)
+        },
+        {
+          filename: "index",
+          fileExtension: "js",
+          content: `const express = require('express');
+const cors = require('cors');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Routes
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Welcome to Express.js!',
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/users', (req, res) => {
+  res.json({
+    users: [
+      { id: 1, name: 'John Doe', email: 'john@example.com' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com' }
+    ]
+  });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(\`Server running on http://localhost:\${PORT}\`);
+});`
+        },
+        {
+          filename: "README",
+          fileExtension: "md",
+          content: `# Express.js Starter Project
+
+A simple Express.js server with basic middleware and routes.
+
+## Getting Started
+
+1. Install dependencies:
+   \`\`\`
+   npm install
+   \`\`\`
+
+2. Start development server:
+   \`\`\`
+   npm run dev
+   \`\`\`
+
+3. Start production server:
+   \`\`\`
+   npm start
+   \`\`\`
+
+The server will be running at http://localhost:3000
+`
+        }
+      ]
+    },
+    VUE: {
+      folderName: "vue-project",
+      items: [
+        {
+          filename: "package",
+          fileExtension: "json",
+          content: JSON.stringify({
+            "name": "vue-project",
+            "version": "0.1.0",
+            "private": true,
+            "scripts": {
+              "serve": "vue-cli-service serve",
+              "build": "vue-cli-service build",
+              "lint": "vue-cli-service lint"
+            },
+            "dependencies": {
+              "core-js": "^3.8.3",
+              "vue": "^3.2.13"
+            },
+            "devDependencies": {
+              "@vue/cli-plugin-babel": "~5.0.0",
+              "@vue/cli-plugin-eslint": "~5.0.0",
+              "@vue/cli-service": "~5.0.0"
+            }
+          }, null, 2)
+        },
+        {
+          filename: "index",
+          fileExtension: "html",
+          content: `<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Vue.js App</title>
+  </head>
+  <body>
+    <noscript>
+      <strong>We're sorry but Vue.js App doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+  </body>
+</html>`
+        },
+        {
+          folderName: "src",
+          items: [
+            {
+              filename: "main",
+              fileExtension: "js",
+              content: `import { createApp } from 'vue'
+import App from './App.vue'
+
+createApp(App).mount('#app')`
+            },
+            {
+              filename: "App",
+              fileExtension: "vue",
+              content: `<template>
+  <div id="app">
+    <img alt="Vue logo" src="./assets/logo.png">
+    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  </div>
+</template>
+
+<script>
+import HelloWorld from './components/HelloWorld.vue'
+
+export default {
+  name: 'App',
+  components: {
+    HelloWorld
+  }
+}
+</script>
+
+<style>
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+}
+</style>`
+            },
+            {
+              folderName: "components",
+              items: [
+                {
+                  filename: "HelloWorld",
+                  fileExtension: "vue",
+                  content: `<template>
+  <div class="hello">
+    <h1>{{ msg }}</h1>
+    <p>
+      For a guide and recipes on how to configure / customize this project,<br>
+      check out the
+      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
+    </p>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'HelloWorld',
+  props: {
+    msg: String
+  }
+}
+</script>
+
+<style scoped>
+h3 {
+  margin: 40px 0 0;
+}
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+li {
+  display: inline-block;
+  margin: 0 10px;
+}
+a {
+  color: #42b983;
+}
+</style>`
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    HONO: {
+      folderName: "hono-project",
+      items: [
+        {
+          filename: "package",
+          fileExtension: "json",
+          content: JSON.stringify({
+            "name": "hono-project",
+            "version": "1.0.0",
+            "description": "Hono.js starter project",
+            "main": "index.js",
+            "scripts": {
+              "start": "node index.js",
+              "dev": "node --watch index.js"
+            },
+            "dependencies": {
+              "hono": "^3.0.0"
+            }
+          }, null, 2)
+        },
+        {
+          filename: "index",
+          fileExtension: "js",
+          content: `import { Hono } from 'hono'
+import { serve } from '@hono/node-server'
+
+const app = new Hono()
+
+app.get('/', (c) => {
+  return c.json({
+    message: 'Welcome to Hono!',
+    timestamp: new Date().toISOString()
+  })
+})
+
+app.get('/api/hello/:name', (c) => {
+  const name = c.req.param('name')
+  return c.json({
+    message: \`Hello, \${name}!\`
+  })
+})
+
+const port = 3000
+console.log(\`Server is running on port \${port}\`)
+
+serve({
+  fetch: app.fetch,
+  port
+})`
+        },
+        {
+          filename: "README",
+          fileExtension: "md",
+          content: `# Hono.js Starter Project
+
+A lightweight and fast web framework for Node.js.
+
+## Getting Started
+
+1. Install dependencies:
+   \`\`\`
+   npm install
+   \`\`\`
+
+2. Start development server:
+   \`\`\`
+   npm run dev
+   \`\`\`
+
+3. Start production server:
+   \`\`\`
+   npm start
+   \`\`\`
+
+The server will be running at http://localhost:3000
+`
+        }
+      ]
+    },
+    ANGULAR: {
+      folderName: "angular-project",
+      items: [
+        {
+          filename: "package",
+          fileExtension: "json",
+          content: JSON.stringify({
+            "name": "angular-project",
+            "version": "0.0.0",
+            "scripts": {
+              "ng": "ng",
+              "start": "ng serve",
+              "build": "ng build",
+              "watch": "ng build --watch --configuration development",
+              "test": "ng test"
+            },
+            "dependencies": {
+              "@angular/animations": "^17.0.0",
+              "@angular/common": "^17.0.0",
+              "@angular/compiler": "^17.0.0",
+              "@angular/core": "^17.0.0",
+              "@angular/forms": "^17.0.0",
+              "@angular/platform-browser": "^17.0.0",
+              "@angular/platform-browser-dynamic": "^17.0.0",
+              "@angular/router": "^17.0.0",
+              "rxjs": "~7.8.0",
+              "tslib": "^2.3.0",
+              "zone.js": "~0.14.0"
+            },
+            "devDependencies": {
+              "@angular-devkit/build-angular": "^17.0.0",
+              "@angular/cli": "^17.0.0",
+              "@angular/compiler-cli": "^17.0.0",
+              "typescript": "~5.2.0"
+            }
+          }, null, 2)
+        },
+        {
+          filename: "angular",
+          fileExtension: "json",
+          content: JSON.stringify({
+            "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+            "version": 1,
+            "newProjectRoot": "projects",
+            "projects": {
+              "angular-project": {
+                "projectType": "application",
+                "schematics": {},
+                "root": "",
+                "sourceRoot": "src",
+                "prefix": "app",
+                "architect": {
+                  "build": {
+                    "builder": "@angular-devkit/build-angular:browser",
+                    "options": {
+                      "outputPath": "dist/angular-project",
+                      "index": "src/index.html",
+                      "main": "src/main.ts",
+                      "polyfills": ["zone.js"],
+                      "tsConfig": "tsconfig.app.json",
+                      "assets": ["src/favicon.ico", "src/assets"],
+                      "styles": ["src/styles.css"],
+                      "scripts": []
+                    }
+                  },
+                  "serve": {
+                    "builder": "@angular-devkit/build-angular:dev-server",
+                    "options": {}
+                  }
+                }
+              }
+            }
+          }, null, 2)
+        },
+        {
+          folderName: "src",
+          items: [
+            {
+              filename: "index",
+              fileExtension: "html",
+              content: `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Angular Project</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html>`
+            },
+            {
+              filename: "main",
+              fileExtension: "ts",
+              content: `import { bootstrapApplication } from '@angular/platform-browser';
+import { AppComponent } from './app/app.component';
+
+bootstrapApplication(AppComponent)
+  .catch((err) => console.error(err));`
+            },
+            {
+              folderName: "app",
+              items: [
+                {
+                  filename: "app.component",
+                  fileExtension: "ts",
+                  content: `import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: \`
+    <div>
+      <h1>Welcome to Angular!</h1>
+      <p>Congratulations! Your app is running. 🎉</p>
+    </div>
+  \`,
+  styles: [\`
+    div {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+    }
+    h1 {
+      color: #dd0031;
+    }
+  \`]
+})
+export class AppComponent {
+  title = 'angular-project';
+}`
+                }
+              ]
             }
           ]
         }
@@ -298,7 +761,27 @@ This is a fallback template for ${templateKey}.
 ## Getting Started
 
 This template was generated automatically because the original template directory was not found.
+
+## Available Commands
+
+- Start development server: \`npm start\`
+- Build for production: \`npm run build\`
+
+Happy coding! 🚀
 `
+      },
+      {
+        filename: "package",
+        fileExtension: "json",
+        content: JSON.stringify({
+          "name": templateKey.toLowerCase() + "-project",
+          "version": "1.0.0",
+          "description": `${templateKey} starter project`,
+          "main": "index.js",
+          "scripts": {
+            "start": "echo 'Hello from " + templateKey + "!'"
+          }
+        }, null, 2)
       }
     ]
   };
@@ -388,21 +871,37 @@ export async function GET(
       console.log("Available directories in lileecode-starters:");
       try {
         const startersDir = path.join(process.cwd(), 'lileecode-starters');
-        const dirs = await fs.readdir(startersDir);
-        console.log("Available starter directories:", dirs);
+        const startersDirExists = await directoryExists(startersDir);
+        if (startersDirExists) {
+          const dirs = await fs.readdir(startersDir);
+          console.log("Available starter directories:", dirs);
+        } else {
+          console.log("lileecode-starters directory does not exist in production - this is expected on Vercel");
+        }
       } catch (err) {
         console.log("Could not read lileecode-starters directory:", err);
+        console.log("This is expected on Vercel deployment where template directories are not included");
       }
       
       // Return a fallback template instead of erroring out
-      console.log("Returning fallback template for:", templateKey);
+      console.log("🚀 Returning fallback template for:", templateKey);
       const fallbackTemplate = createFallbackTemplate(templateKey);
+      
+      if (!fallbackTemplate || !fallbackTemplate.items || fallbackTemplate.items.length === 0) {
+        console.error("Fallback template is empty or invalid for:", templateKey);
+        return Response.json({ 
+          error: "Template not available",
+          details: `No template or fallback available for ${templateKey}`
+        }, { status: 404 });
+      }
+
+      console.log("✅ Fallback template created successfully with", fallbackTemplate.items.length, "items");
       
       return Response.json({ 
         success: true, 
         templateJson: fallbackTemplate,
         fallback: true,
-        message: `Using fallback template for ${templateKey}`
+        message: `Using fallback template for ${templateKey}. Template directories are not available in this environment (likely Vercel production).`
       }, { status: 200 });
     }
 

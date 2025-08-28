@@ -1,0 +1,9 @@
+# Exclude large template directories from Vercel deployment
+# Fallback templates are used instead
+lileecode-starters/
+
+# Exclude generated output directory
+output/
+
+# Exclude Prisma generated files (they'll be regenerated)
+lib/generated/

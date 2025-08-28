@@ -83,11 +83,23 @@ export const usePlayground = (id: string): UsePlaygroundReturn => {
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
         console.error("API Error Response:", errorData);
+        
+        // Check if it's an authentication error
+        if (res.status === 401 || res.status === 403) {
+          throw new Error("Authentication required. Please sign in to access this playground.");
+        }
+        
         throw new Error(`Failed to load template: ${res.status} - ${errorData.error || errorData.details || 'Unknown error'}`);
       }
 
       const templateRes = await res.json();
       console.log("Template API Response:", templateRes);
+      
+      // Check if we're using a fallback template
+      if (templateRes.fallback) {
+        console.log("✅ Using fallback template:", templateRes.message);
+        toast.info("Using fallback template - template directories not available in this environment");
+      }
       
       if (templateRes.templateJson) {
         if (Array.isArray(templateRes.templateJson)) {
@@ -99,7 +111,12 @@ export const usePlayground = (id: string): UsePlaygroundReturn => {
           setTemplateData(templateRes.templateJson);
         }
         console.log("Template loaded successfully from API");
-        toast.success("Template loaded successfully");
+        
+        if (templateRes.fallback) {
+          toast.success("Fallback template loaded successfully");
+        } else {
+          toast.success("Template loaded successfully");
+        }
       } else {
         console.warn("No template data received from API");
         setTemplateData({
