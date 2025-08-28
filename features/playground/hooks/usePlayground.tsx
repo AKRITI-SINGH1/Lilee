@@ -6,8 +6,18 @@ import type { TemplateFolder } from '@/features/playground/libs/path-to-json';
 
 interface PlaygroundData {
   id: string;
-  name?: string;
-  [key: string]: any;
+  title: string;
+  description?: string | null;
+  template: string;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  templateFiles: Array<{
+    id: string;
+    content: any; // JsonValue from Prisma
+    createdAt: Date;
+    updatedAt: Date;
+  }>;
 }
 
 interface UsePlaygroundReturn {
@@ -32,47 +42,78 @@ export const usePlayground = (id: string): UsePlaygroundReturn => {
       setIsLoading(true);
       setError(null);
 
+      console.log("Loading playground with ID:", id);
       const data = await getPlaygroundById(id);
-    //   @ts-ignore
-      setPlaygroundData(data);
+      console.log("Playground data received:", data);
 
-      const rawContent = data?.templateFiles?.[0]?.content;
-      if (typeof rawContent === "string") {
-        const parsedContent = JSON.parse(rawContent);
-        setTemplateData(parsedContent);
-        toast.success("Playground loaded successfully");
-        return;
+      if (!data) {
+        throw new Error("Playground not found");
       }
 
-      // Load template from API if not in saved content
+      setPlaygroundData(data);
+
+      // First, try to load from saved template files
+      const rawContent = data?.templateFiles?.[0]?.content;
+      if (rawContent && typeof rawContent === "string") {
+        try {
+          const parsedContent = JSON.parse(rawContent);
+          setTemplateData(parsedContent);
+          console.log("Template loaded from saved content");
+          toast.success("Playground loaded successfully");
+          return;
+        } catch (parseError) {
+          console.warn("Failed to parse saved template content:", parseError);
+        }
+      } else if (rawContent && typeof rawContent === "object") {
+        // Handle case where content is already parsed as JSON object
+        try {
+          setTemplateData(rawContent as unknown as TemplateFolder);
+          console.log("Template loaded from saved content (already parsed)");
+          toast.success("Playground loaded successfully");
+          return;
+        } catch (error) {
+          console.warn("Failed to use pre-parsed content:", error);
+        }
+      }
+
+      // If no saved content, load template from API
+      console.log("Loading template from API for playground:", id);
       const res = await fetch(`/api/template/${id}`);
       
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
         console.error("API Error Response:", errorData);
-        throw new Error(`Failed to load template: ${res.status} - ${errorData.error || 'Unknown error'}`);
+        throw new Error(`Failed to load template: ${res.status} - ${errorData.error || errorData.details || 'Unknown error'}`);
       }
 
       const templateRes = await res.json();
       console.log("Template API Response:", templateRes);
       
-      if (templateRes.templateJson && Array.isArray(templateRes.templateJson)) {
-        setTemplateData({
-          folderName: "Root",
-          items: templateRes.templateJson,
-        });
+      if (templateRes.templateJson) {
+        if (Array.isArray(templateRes.templateJson)) {
+          setTemplateData({
+            folderName: "Root",
+            items: templateRes.templateJson,
+          });
+        } else {
+          setTemplateData(templateRes.templateJson);
+        }
+        console.log("Template loaded successfully from API");
+        toast.success("Template loaded successfully");
       } else {
-        setTemplateData(templateRes.templateJson || {
+        console.warn("No template data received from API");
+        setTemplateData({
           folderName: "Root",
           items: [],
         });
+        toast.warning("Template loaded but appears to be empty");
       }
 
-      toast.success("Template loaded successfully");
     } catch (error) {
       console.error("Error loading playground:", error);
-      setError("Failed to load playground data");
-      toast.error("Failed to load playground data");
+      const errorMessage = error instanceof Error ? error.message : "Failed to load playground data";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

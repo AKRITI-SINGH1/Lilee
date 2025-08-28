@@ -98,9 +98,19 @@ export const getPlaygroundById = async (id:string)=>{
         const playground = await db.playground.findUnique({
             where:{id},
             select:{
+              id: true,
+              title: true,
+              description: true,
+              template: true,
+              createdAt: true,
+              updatedAt: true,
+              userId: true,
               templateFiles:{
                 select:{
-                  content:true
+                  id: true,
+                  content: true,
+                  createdAt: true,
+                  updatedAt: true
                 }
               }
             }
@@ -108,6 +118,7 @@ export const getPlaygroundById = async (id:string)=>{
         return playground;
     } catch (error) {
         console.log(error)
+        return null;
     }
 }
 

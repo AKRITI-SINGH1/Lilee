@@ -51,12 +51,21 @@ export async function GET(
 
     console.log("Playground found:", playground);
 
+    // Check if template field exists and is valid
+    if (!playground.template) {
+      console.error("Playground has no template specified:", id);
+      return Response.json({ error: "No template specified for this playground" }, { status: 400 });
+    }
+
     const templateKey = playground.template as keyof typeof templatePaths;
     const templatePath = templatePaths[templateKey];
 
     if (!templatePath) {
-      console.error("Invalid template key:", templateKey);
-      return Response.json({ error: "Invalid template" }, { status: 404 });
+      console.error("Invalid template key:", templateKey, "Available keys:", Object.keys(templatePaths));
+      return Response.json({ 
+        error: "Invalid template",
+        details: `Template "${templateKey}" not found. Available templates: ${Object.keys(templatePaths).join(', ')}`
+      }, { status: 404 });
     }
 
     const inputPath = path.join(process.cwd(), templatePath);
@@ -70,9 +79,18 @@ export async function GET(
     const dirExists = await directoryExists(inputPath);
     if (!dirExists) {
       console.error("Template directory does not exist:", inputPath);
+      console.log("Available directories in lileecode-starters:");
+      try {
+        const startersDir = path.join(process.cwd(), 'lileecode-starters');
+        const dirs = await fs.readdir(startersDir);
+        console.log("Available starter directories:", dirs);
+      } catch (err) {
+        console.log("Could not read lileecode-starters directory:", err);
+      }
+      
       return Response.json({ 
         error: "Template directory not found",
-        details: `Directory ${inputPath} does not exist`
+        details: `Directory ${inputPath} does not exist. Template: ${templateKey}, Path: ${templatePath}`
       }, { status: 404 });
     }
 
@@ -84,7 +102,7 @@ export async function GET(
     await saveTemplateStructureToJson(inputPath, outputFile);
     const result = await readTemplateStructureFromJson(outputFile);
 
-    console.log("Template structure loaded successfully");
+    console.log("Template structure loaded successfully, items count:", Array.isArray(result) ? result.length : 'N/A');
 
     // Validate the JSON structure before returning
     if (!validateJsonStructure(result)) {
