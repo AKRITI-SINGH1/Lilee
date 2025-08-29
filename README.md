@@ -190,7 +190,7 @@ Create `.env.local` in the project root:
 
 ```bash
 # 🗄️ Database
-DATABASE_URL="mongodb+srv://username:password@cluster.mongodb.net/lilee?retryWrites=true&w=majority"
+DATABASE_URL="mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@your-cluster.mongodb.net/lilee?retryWrites=true&w=majority"
 
 # 🔒 Authentication
 AUTH_SECRET="your-super-secret-jwt-key-here"  # Generate: openssl rand -base64 32
@@ -207,6 +207,8 @@ GOOGLE_SECRET="your_google_oauth_client_secret"
 OPENAI_API_KEY="sk-your-openai-api-key"      # For AI code suggestions
 ```
 
+> **🔒 Security Note:** Replace ALL placeholder values with your actual credentials. Never commit real credentials to version control!
+
 <details>
 <summary><b>🔧 OAuth Setup Guide</b></summary>
 
@@ -222,6 +224,29 @@ OPENAI_API_KEY="sk-your-openai-api-key"      # For AI code suggestions
 3. Enable Google+ API
 4. Create OAuth 2.0 credentials
 5. Add `http://localhost:3000/api/auth/callback/google` to authorized redirect URIs
+
+</details>
+
+<details>
+<summary><b>🛡️ Security Best Practices</b></summary>
+
+### **Environment Variables Security**
+- ✅ Never commit `.env.local` or `.env` files to version control
+- ✅ Add `.env*` to your `.gitignore` file
+- ✅ Use different credentials for development and production
+- ✅ Rotate credentials regularly
+
+### **MongoDB Security**
+- ✅ Create a dedicated database user with minimal permissions
+- ✅ Use IP whitelist in MongoDB Atlas
+- ✅ Enable network access restrictions
+- ✅ Use strong, unique passwords
+
+### **Production Deployment**
+- ✅ Set environment variables in your hosting platform (Vercel, Netlify, etc.)
+- ✅ Never use development credentials in production
+- ✅ Enable HTTPS for all environments
+- ✅ Regularly audit your secrets and API keys
 
 </details>
 
