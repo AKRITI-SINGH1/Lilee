@@ -1,6 +1,5 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/AKRITI-SINGH1/Lilee/main/public/hero.svg" alt="Lilee Hero" width="100" />
 
 # ✨ **Lilee**
 
@@ -35,9 +34,9 @@ Lilee transforms your browser into a **complete development environment**. No mo
 
 ### 🎬 **See It in Action**
 
-*Coming soon — playground demo with live coding, terminal, and deployment*
+*Experience the power of Lilee — live coding playground with terminal and AI assistance*
 
-[![Demo Preview](https://img.shields.io/badge/🎥_Live_Demo-Coming_Soon-FF6B6B?style=for-the-badge)](https://lilee.vercel.app)
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Try_Now-FF6B6B?style=for-the-badge)](https://lilee-five.vercel.app/)
 
 </div>
 
@@ -452,7 +451,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 **Ready to revolutionize your development workflow?**
 
-[![Get Started](https://img.shields.io/badge/🚀_Get_Started-Right_Now-FF6B6B?style=for-the-badge)](https://lilee.vercel.app)
+[![Get Started](https://img.shields.io/badge/🚀_Get_Started-Right_Now-FF6B6B?style=for-the-badge)](https://lilee-five.vercel.app/)
 [![Join Discord](https://img.shields.io/badge/💬_Join_Community-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/lilee)
 
 ---
