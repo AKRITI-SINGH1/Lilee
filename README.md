@@ -36,6 +36,8 @@ Lilee transforms your browser into a **complete development environment**. No mo
 
 *Experience the power of Lilee — live coding playground with terminal and AI assistance*
 
+<img src="https://raw.githubusercontent.com/AKRITI-SINGH1/Lilee/main/public/lilee-preview.png" alt="Lilee Sign In Preview" width="600" style="border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);" />
+
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Try_Now-FF6B6B?style=for-the-badge)](https://lilee-five.vercel.app/)
 
 </div>
